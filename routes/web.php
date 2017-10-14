@@ -11,6 +11,11 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', array('as' => 'home', 'uses' => 'SensorsController@index'));
+Route::name('ldr_log')->get('ldr', [
+				'as' => 'ldr_log',
+				'uses' => 'SensorsController@ldr',
+				]);
+Route::post('logData', 'SensorsController@logData');
+
+

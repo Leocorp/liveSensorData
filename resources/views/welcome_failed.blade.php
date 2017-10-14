@@ -11,7 +11,6 @@
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
 
         <!-- Styles -->
-        <link type="text/css" rel="stylesheet" href="//pubnub.github.io/eon/v/eon/0.0.9/eon.css" />
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
         <style>
             html, body {
@@ -64,12 +63,12 @@
             .m-b-md {
                 margin-bottom: 30px;
             }
-            
         </style>
         
+        <link type="text/css" rel="stylesheet" href="//pubnub.github.io/eon/v/eon/0.0.9/eon.css" />
     </head>
     <body class="container-fluid">
-        <div class="flex-center position-ref ">
+        <div class="flex-center position-ref full-height">
             @if (Route::has('login'))
                 <div class="top-right links">
                     @if (Auth::check())
@@ -85,26 +84,31 @@
                 <div class="title m-b-md">
                     SENSOR DATA
                 </div>
+
                 <div class="links" style="background: red">
                     <a class="" style="color: white" href="">LDR</a>
                 </div>
                 <br>
-				<div class="">
+                <div id="dbData"> 
+	                <lux></lux>
+                </div>
+                <br>
+                <template id="light_intensity_log">
 	                <table class="table table-hover" border="1" cellspacing="1" cellpadding="10">
 						<tr class="info">
 							<td>&nbsp;<span style="font-weight: bold">Timestamp</span>&nbsp;</td>
 							<td>&nbsp;<span style="font-weight: bold">Luminosity</span>&nbsp;</td>
 						</tr>
-						@foreach($ldr_data as $data)
-							<tr>
-								<td>{{ $data->created_at }}</td>
-								<td>{{ $data->luminosity }}</td>
-							</tr>
-						@endforeach
 						
-				    </table>
-				</div>
+						<tr v-for="data in ldr_data">
+							<td>@{{ data.created_at }}</td>
+							<td>@{{ data.luminosity }}</td>
+						</tr>
+								
+				   </table>
+                </template>
                 <br>
+          
                 <div id="chart">
 				  <div id="light"></div>
 				</div>
@@ -112,6 +116,7 @@
         </div>
 	    <script src="//cdn.pubnub.com/pubnub-3.10.2.js"></script>
 		<script src="//pubnub.github.io/eon/v/eon/0.0.9/eon.js"></script>
+		<script src="https://unpkg.com/vue"></script>
 		<script>
 			var pubnub = PUBNUB.init({
 			    publish_key:'pub-c-2f8fc330-a26c-4a2c-a09b-106329648eb4',
@@ -163,6 +168,34 @@
 			  }
 			});
 			
+			
+			Vue.component('lux',{
+				template: '#light_intensity_log',
+				
+				data: function(){
+					return {
+						ldr_data: []
+					}
+				},
+				
+				created: function(){
+					this.getLDRData();
+				},
+				
+				methods: {
+					getLDRData: function(){
+						console.log('getLDRDATA');
+						$.getJSON("{{ route('ldr') }}", function(ldr_data){
+							this.ldr_data = ldr_data;
+						}.bind(this));
+					},
+				}
+				
+			});
+			new Vue({
+				el: '#dbData',
+				
+			});
 			
 		</script>
     </body>
